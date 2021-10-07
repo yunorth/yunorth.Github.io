@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | PAT甲级1001  A+B Format</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h2><a id="__PAT1001__AB_Format_0"></a>小白编程 | PAT甲级1001  A+B Format</h2>
+<p><em>2020-02-05 /00:31:41</em></p>
+<h1><a id="PAT1001__AB_Format_3"></a>PAT甲级1001  A+B Format</h1>
+<blockquote>
+<p>Calculate a+b and output the sum in standard format – that is, the digits must be separated into groups of three by commas (unless there are less than four digits).</p>
+<h5><a id="Input_Specification_6"></a>Input Specification:</h5>
+<p>Each input file contains one test case. Each case contains a pair of   integers a and b where −10<sup>6</sup> ≤a,b≤ 10<sup>6</sup>. The numbers are separated by a space.</p>
+<p>输入两个int数字（−10<sup>6</sup> ≤a,b≤ 10<sup>6</sup>），中间用空格分隔。</p>
+<h5><a id="Output_Specification_10"></a>Output Specification:</h5>
+<p>For each test case, you should output the sum of a and b in one line. The sum must be written in the standard format.</p>
+<p>使用指定格式输出两个数之和：每三位用“,”分隔。</p>
+<h5><a id="Sample_Input_14"></a>Sample Input:</h5>
+<pre><code>-1000000 9
+</code></pre>
+<h5><a id="Sample_Output_18"></a>Sample Output:</h5>
+<pre><code>-999,991
+</code></pre>
+</blockquote>
+<h3><a id="_23"></a>代码（两个写法）</h3>
+<pre><code class="prism language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;iostream&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;string&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;cstring&gt;</span></span>
+<span class="token comment">/* 1001 A+B Format */</span>
+
+<span class="token keyword">using</span> <span class="token keyword">namespace</span> std<span class="token punctuation">;</span>
+
+<span class="token comment">//方法一</span>
+<span class="token comment">//*/</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> a<span class="token punctuation">,</span>b<span class="token punctuation">,</span>c<span class="token punctuation">,</span>i<span class="token punctuation">,</span>j<span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>a<span class="token punctuation">,</span><span class="token operator">&amp;</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	c <span class="token operator">=</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+	<span class="token keyword">char</span> s1<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">,</span>s2<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">;</span> 	<span class="token comment">//s1用作承接c,s2用作去除'-' </span>
+	<span class="token function">sprintf</span><span class="token punctuation">(</span>s1<span class="token punctuation">,</span><span class="token string">"%d"</span><span class="token punctuation">,</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>s1<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token operator">==</span><span class="token string">'-'</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"-"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//负号在此先输出 </span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token function">strlen</span><span class="token punctuation">(</span>s1<span class="token punctuation">)</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			s2<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> s1<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>		<span class="token comment">//把正数的s1赋值给s2</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">strcpy</span><span class="token punctuation">(</span>s2<span class="token punctuation">,</span>s1<span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//正数情况下把s1完全赋值给s2 </span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">int</span> len <span class="token operator">=</span> <span class="token function">strlen</span><span class="token punctuation">(</span>s2<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//计算数字字符串长度 </span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>j<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>j<span class="token operator">&lt;</span>len<span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token punctuation">(</span>len<span class="token operator">-</span>j<span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token number">3</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>	<span class="token comment">//当其剩下3的倍数位是输出逗号 </span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>len <span class="token operator">-</span> j <span class="token operator">!=</span> len<span class="token punctuation">)</span><span class="token punctuation">{</span> 	<span class="token comment">//为保证6位数时第一位输出不是逗号 </span>
+				<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">","</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+		<span class="token function">putchar</span><span class="token punctuation">(</span>s2<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//输出数字 </span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">//*/</span>
+
+
+<span class="token comment">//方法二</span>
+<span class="token comment">/*/
+int main(){
+	int a,b,c;
+	cin &gt;&gt; a &gt;&gt;b;
+	//scanf("%d %d",&amp;a,&amp;b);
+	c = a + b;
+	char s[100];
+	sprintf(s,"%d",c);
+	int len = strlen(s);
+	for(int i=0;i&lt;len;i++){
+		printf("%c",s[i]);
+		if(s[i]=='-') continue;
+		if( (i + 1) % 3 == len % 3 &amp;&amp; i != len - 1){
+			printf("%c",',');
+		}
+	}
+}
+
+//*/</span>
+
+</code></pre>
+<h3><a id="_85"></a>要点</h3>
+<ol>
+<li><code>strlen()</code>包含在头文件<code>#include&lt;string&gt;</code>中</li>
+<li>在逻辑判断是否是3的倍数来输出逗号时，要保证数字长度为3的倍数时第一位不输出逗号</li>
+</ol>
+</div>
+</body>
+
+</html>

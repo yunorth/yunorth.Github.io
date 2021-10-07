@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | PAT甲级1002  A+B Polynomials</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1><a id="__PAT1002__AB_Polynomials_0"></a>小白编程 | PAT甲级1002  A+B Polynomials</h1>
+<p><em>2020-02-05/00:36:05</em></p>
+<h2><a id="PAT1002__AB_Polynomials_2"></a>PAT甲级1002  A+B Polynomials</h2>
+<blockquote>
+<p>This time, you are supposed to find A+B where A and B are two polynomials.</p>
+<h5><a id="Input_Specification_6"></a>Input Specification:</h5>
+<p>Each input file contains one test case. Each case occupies 2 lines, and each line contains the information of a polynomial（多项式）:<br>
+K N1 a​N1 N​2 aN2… NK aNK<br>
+where K is the number of <strong>nonzero terms</strong> in the polynomial, N​i​  and aNi​​  (i=1,2,⋯,K) are the exponents and coefficients, respectively. It is given that 1≤K≤10，0≤NK&lt;⋯&lt;N2&lt;N1≤1000.</p>
+<p>输入K为这个多项式有几项，接下来的每两个数为一项，第一个数为指数，第二个数为指数</p>
+<h5><a id="Output_Specification_13"></a>Output Specification:</h5>
+<p>For each test case you should output the sum of A and B in one line, with the same format as the input. Notice that there must be NO extra space at the end of each line. <strong>Please be accurate to 1 decimal place</strong>.</p>
+<p>输出两个多项式相加以后有几项，并输出指数和系数，注意数据要精确到小数点后一位</p>
+<h5><a id="Sample_Input_18"></a>Sample Input:</h5>
+<pre><code>2 1 2.4 0 3.2
+
+2 2 1.5 1 0.5
+</code></pre>
+<h5><a id="Sample_Output_25"></a>Sample Output:</h5>
+<pre><code>3 2 1.5 1 2.9 0 3.2
+</code></pre>
+</blockquote>
+<h3><a id="_30"></a>代码</h3>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;iostream&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;map&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;iterator&gt;</span></span>
+using namespace std<span class="token punctuation">;</span>
+
+std<span class="token operator">::</span>map<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token punctuation">,</span>greater<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token operator">&gt;</span> poly<span class="token punctuation">;</span>
+	
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> count<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">,</span>K<span class="token punctuation">,</span>n<span class="token punctuation">;</span>
+	<span class="token keyword">double</span> m<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>count<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		cin <span class="token operator">&gt;&gt;</span> K<span class="token punctuation">;</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>K<span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			cin <span class="token operator">&gt;&gt;</span> n <span class="token operator">&gt;&gt;</span> m<span class="token punctuation">;</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>poly<span class="token punctuation">.</span><span class="token function">count</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+				poly<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>std<span class="token operator">::</span>pair<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span>m<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+				m <span class="token operator">=</span> poly<span class="token punctuation">.</span><span class="token function">at</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token operator">+</span> m<span class="token punctuation">;</span>
+				poly<span class="token punctuation">.</span><span class="token function">erase</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+				poly<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>std<span class="token operator">::</span>pair<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span>m<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>poly<span class="token punctuation">.</span><span class="token function">at</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token comment">//如果系数为0，那么删除此数据项</span>
+			<span class="token comment">//一开始我没有注意题目里面的nonzero terms没有加这一段导致没有AC</span>
+				poly<span class="token punctuation">.</span><span class="token function">erase</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+		count<span class="token operator">--</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	cout <span class="token operator">&lt;&lt;</span> poly<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	map<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token operator">&gt;</span><span class="token operator">::</span>iterator it <span class="token operator">=</span> poly<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>it <span class="token operator">!=</span> poly<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">" %d %.1lf"</span><span class="token punctuation">,</span>it<span class="token operator">-&gt;</span>first<span class="token punctuation">,</span>it<span class="token operator">-&gt;</span>second<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		it <span class="token operator">++</span> <span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3><a id="_70"></a>要点</h3>
+<ol>
+<li>map从大到小排序</li>
+</ol>
+<pre><code class="prism language-cpp">std<span class="token operator">::</span>map<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token punctuation">,</span>greater<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token operator">&gt;</span> map
+</code></pre>
+<ol start="2">
+<li>map插入</li>
+</ol>
+<pre><code class="prism language-cpp">map<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>std<span class="token operator">::</span>pair<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">double</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span>value<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<ol start="3">
+<li>
+<p>要认真审题，否则会遗漏点不能AC</p>
+</li>
+<li>
+<p>总而言之就是要熟悉map操作，详见下面这个文章</p>
+</li>
+</ol>
+<p><a href="https://note.youdao.com/">https://blog.csdn.net/shuzfan/article/details/53115922</a></p>
+</div>
+</body>
+
+</html>

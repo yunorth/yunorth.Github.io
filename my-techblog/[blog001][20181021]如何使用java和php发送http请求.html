@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【学习|总结】如何使用java和php发送http请求</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+
+<div class="stackedit__html"><h2><a id="javaphphttp_0"></a>如何使用java和php发送http请求</h2>
+<p><em>2018-10-21/14:24:19</em></p>
+<p>第一篇博客写什么呢=w=看看下面的吧</p>
+<p>最近在学php后台开发，遇到一个学号验证问题，所以需要携带token请求学校接口返回学生信息，通过解析json来获取学生学号。这让我想起大一下学期做java音乐播放器时也涉及到了请求接口的问题，下面来看一下具体实现吧~</p>
+<ul>
+<li>java发送请求并接收返回的json对象</li>
+</ul>
+<p>工具包：</p>
+<ol>
+<li>httpClient相关包：在jdk中自带直接<code>import</code>就好；</li>
+<li>json相关包：<a href="https://pan.baidu.com/s/1A8lBHZu0pbHkNsQR2IspeQ">点这里下载</a></li>
+</ol>
+<p>java携带请求头发送http请求分为七步：</p>
+<ol>
+<li>创建httpClient对象；</li>
+<li>创建请求对象（get/post/delete），并设置请求的url；</li>
+<li>往请求头中加入一个键值对</li>
+<li>用httpClient对象的<code>execute()</code>方法执行请求；</li>
+<li>用HttpResponse的<code>getEntity()</code>方法获取httpEntity对象，该对象包含了服务器的响应内容。</li>
+<li>关闭响应对象；</li>
+<li>关闭httpClient。</li>
+</ol>
+<p>具体参见如下代码（以GET为例）：</p>
+<pre><code class="prism language-java"><span class="token keyword">package</span> <span class="token namespace">test<span class="token punctuation">.</span>yubei<span class="token punctuation">.</span>com<span class="token punctuation">.</span>app<span class="token punctuation">.</span>api</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span><span class="token class-name">IOException</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>http<span class="token punctuation">.</span>client<span class="token punctuation">.</span>methods<span class="token punctuation">.</span></span><span class="token class-name">CloseableHttpResponse</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>http<span class="token punctuation">.</span>client<span class="token punctuation">.</span>methods<span class="token punctuation">.</span></span><span class="token class-name">HttpGet</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>http<span class="token punctuation">.</span>impl<span class="token punctuation">.</span>client<span class="token punctuation">.</span></span><span class="token class-name">CloseableHttpClient</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>http<span class="token punctuation">.</span>impl<span class="token punctuation">.</span>client<span class="token punctuation">.</span></span><span class="token class-name">HttpClients</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>http<span class="token punctuation">.</span>util<span class="token punctuation">.</span></span><span class="token class-name">EntityUtils</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>json<span class="token punctuation">.</span></span><span class="token class-name">JSONException</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token namespace">org<span class="token punctuation">.</span>json<span class="token punctuation">.</span></span><span class="token class-name">JSONObject</span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">DoGet</span> <span class="token punctuation">{</span>
+    
+    <span class="token comment">/*执行GET请求
+     *
+     *@param String api：要请求的url
+     *@param String token：用户token
+     *@return JSONObject
+     *
+     */</span>
+	<span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">JSONObject</span> <span class="token function">doGet</span><span class="token punctuation">(</span><span class="token class-name">String</span> api<span class="token punctuation">,</span><span class="token class-name">String</span> token<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">try</span> <span class="token punctuation">{</span>
+			<span class="token comment">//1、创建httpClient对象</span>
+			<span class="token class-name">CloseableHttpClient</span> httpClient <span class="token operator">=</span> <span class="token class-name">HttpClients</span><span class="token punctuation">.</span><span class="token function">createDefault</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">//2、创建get对象，设置url</span>
+			<span class="token class-name">HttpGet</span> get <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HttpGet</span><span class="token punctuation">(</span>api<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">//3.往请求头中加入一个键值对</span>
+			get<span class="token punctuation">.</span><span class="token function">setHeader</span><span class="token punctuation">(</span><span class="token string">"Authorization"</span><span class="token punctuation">,</span>token<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">//3、执行get请求</span>
+			<span class="token class-name">CloseableHttpResponse</span> response <span class="token operator">=</span> httpClient<span class="token punctuation">.</span><span class="token function">execute</span><span class="token punctuation">(</span>get<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">/*
+			 * HttpResponse的getEntity()方法可获取HttpEntity对象，
+			 * 该对象包装了服务器的响应内容。程序可通过该对象获取服务器的响应内容。
+			 */</span>
+			<span class="token class-name">String</span> str <span class="token operator">=</span> <span class="token class-name">EntityUtils</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span><span class="token function">getEntity</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			response<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">//关闭响应对象</span>
+			httpClient<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">//关闭httpClient</span>
+			<span class="token class-name">JSONObject</span> jsonObject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">JSONObject</span><span class="token punctuation">(</span>str<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">//将服务器响应内容变成json对象</span>
+			<span class="token keyword">return</span> jsonObject<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">JSONException</span> <span class="token operator">|</span> <span class="token class-name">IOException</span> e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			<span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<ul>
+<li>PHP携带请求头发送请求并解析返回的json</li>
+</ul>
+<p>cURL是一个利用URL语法在命令行下工作的文件传输工具。cURL支持的通信协议有FTP、FTPS、HTTP、HTTPS等。PHP可使用cURL库快速发送请求然后获得服务器响应内容，下面介绍几个cURL常用函数：</p>
+<ol>
+<li><code>curl_init()</code></li>
+</ol>
+<p>初始化cURL会话,返回 cURL 句柄，供<code>curl_setopt()</code>、 <code>curl_exec()</code>和 <code>curl_close()</code>函数使用。</p>
+<ol start="2">
+<li><code>curl_setopt ( resource $ch , string $option , mixed $value )</code></li>
+</ol>
+<p>为 cURL 会话句柄设置选项，返回值为布尔值。</p>
+<p>这里的<code>$option</code>参数是你想要的设置，<code>$value</code>是给这个<code>$option</code>指定的值。</p>
+<p>官方文档中<code>$option</code>是<code>int</code>类型，但是经过实践我认为是字符串类型，所以修改为了<code>string</code>。</p>
+<p>这么写可能有点抽象还是写不清楚这两个参数是干什么的，举个例子吧！</p>
+<p>eg：<code>$option</code>为<code>CURLOPT_RETURNTRANSFER</code>的功能为设置传输方式，我想要直接输出响应内容，于是我设置<code>$value</code>为0。我想要传输数据用别的变量来接它，于是我设置<code>$value</code>为1。</p>
+<ol start="3">
+<li><code>curl_exec ( resource $ch )</code></li>
+</ol>
+<p>执行给定的 cURL 会话。这个函数应该在初始化一个 cURL 会话并且设置完全部的选项后被调用。</p>
+<ol start="4">
+<li><code>curl_close ( resource $ch )</code></li>
+</ol>
+<p>关闭 cURL 会话并且释放所有资源，返回值为空。cURL 句柄也会被删除。</p>
+<p>下面来看一个具体的例子吧：</p>
+<pre><code class="prism language-php"><span class="token delimiter important">&lt;?php</span>
+
+    <span class="token comment">/*执行GET请求
+     *
+     *@param String $url：url
+     *@return json
+     */</span>
+    <span class="token keyword">function</span> <span class="token function">doGet</span><span class="token punctuation">(</span><span class="token variable">$url</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token comment">//1、curl初始化</span>
+        <span class="token variable">$ch</span> <span class="token operator">=</span> <span class="token function">curl_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//2、设置URL</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_URL</span><span class="token punctuation">,</span> <span class="token variable">$url</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+        <span class="token comment">//3、设置传输方式，参数为1表示传输数据，为0表示直接输出显示。</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_RETURNTRANSFER</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+        <span class="token comment">//4、设置请求头</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span><span class="token constant">CURLOPT_HTTPHEADER</span><span class="token punctuation">,</span><span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"Authorization:<span class="token interpolation"><span class="token variable">$token</span></span>"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//5、执行请求</span>
+        <span class="token variable">$output</span> <span class="token operator">=</span> <span class="token function">curl_exec</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$output</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        	<span class="token keyword">echo</span> <span class="token function">makeErrJson</span><span class="token punctuation">(</span><span class="token number">50001</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"Internal Server Error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+        	<span class="token variable">$data</span> <span class="token operator">=</span> <span class="token function">json_decode</span><span class="token punctuation">(</span><span class="token variable">$output</span><span class="token punctuation">,</span><span class="token constant boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        	<span class="token keyword">return</span> <span class="token variable">$data</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">//6、用完记得关掉</span>
+        <span class="token function">curl_close</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    
+    
+    <span class="token comment">/*执行POST请求
+     *
+     *@param String $url：url
+     *@return json
+     */</span>
+    <span class="token keyword">function</span> <span class="token function">doPost</span><span class="token punctuation">(</span><span class="token variable">$url</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        <span class="token comment">//1、curl初始化</span>
+        <span class="token variable">$ch</span> <span class="token operator">=</span> <span class="token function">curl_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//2、设置URL</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_URL</span><span class="token punctuation">,</span> <span class="token variable">$url</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+        <span class="token comment">//3、设置传输方式，参数为1表示传输数据，为0表示直接输出显示。</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_RETURNTRANSFER</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+        <span class="token comment">//4、设置post方式提交</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$curl</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_POST</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//5、设置post数据</span>
+        <span class="token variable">$post_data</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span>
+            <span class="token string double-quoted-string">"stuno"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"17051804"</span><span class="token punctuation">,</span>
+            <span class="token string double-quoted-string">"name"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"yubei"</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$curl</span><span class="token punctuation">,</span> <span class="token constant">CURLOPT_POSTFIELDS</span><span class="token punctuation">,</span> <span class="token variable">$post_data</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//6、设置请求头</span>
+        <span class="token function">curl_setopt</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">,</span><span class="token constant">CURLOPT_HTTPHEADER</span><span class="token punctuation">,</span><span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"Authorization:<span class="token interpolation"><span class="token variable">$token</span></span>"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">//7、执行请求</span>
+        <span class="token variable">$output</span> <span class="token operator">=</span> <span class="token function">curl_exec</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$output</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+        	<span class="token keyword">echo</span> <span class="token function">makeErrJson</span><span class="token punctuation">(</span><span class="token number">50001</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"Internal Server Error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+        	<span class="token variable">$data</span> <span class="token operator">=</span> <span class="token function">json_decode</span><span class="token punctuation">(</span><span class="token variable">$output</span><span class="token punctuation">,</span><span class="token constant boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        	<span class="token keyword">return</span> <span class="token variable">$data</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">//8、用完记得关掉</span>
+        <span class="token function">curl_close</span><span class="token punctuation">(</span><span class="token variable">$ch</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    
+    
+    <span class="token comment">
+        /*生成错误信息json
+     *
+     *@param String $code：错误代码
+     *@param String $msg：错误信息
+     *@return json
+     */</span>
+    <span class="token keyword">function</span> <span class="token function">makeErrJson</span><span class="token punctuation">(</span><span class="token variable">$code</span><span class="token punctuation">,</span><span class="token variable">$msg</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token variable">$json</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span>
+			<span class="token string double-quoted-string">"error"</span> <span class="token operator">=&gt;</span> <span class="token variable">$code</span><span class="token punctuation">,</span>
+			<span class="token string double-quoted-string">"msg"</span> <span class="token operator">=&gt;</span> <span class="token variable">$msg</span>
+		<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> <span class="token function">json_encode</span><span class="token punctuation">(</span><span class="token variable">$json</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	
+<span class="token operator">?</span><span class="token operator">&gt;</span>
+
+</code></pre>
+</div>
+</body>
+
+</html>

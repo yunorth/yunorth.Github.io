@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | CCF CSP201909-1小明种苹果（思路分析）</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h2><a id="__CCF_CSP2019091_0"></a>小白编程 | CCF CSP201909-1小明种苹果（思路分析）</h2>
+<p><em>2020-02-09 /19:56:27</em></p>
+<h2><a id="CCF_CSP2019091_3"></a>CCF CSP201909-1小明种苹果（思路分析）</h2>
+<p><em>纠错联系右侧邮箱</em></p>
+<p>接下来提供两种写法，思路是差不多的。</p>
+<h2><a id="1_9"></a>解法1</h2>
+<ol>
+<li>输入所需参数</li>
+<li>一次性计算出苹果剩余数</li>
+<li>通过对比疏果数是否比上一个记录的最大值大来确定最大值，同时记录下标</li>
+</ol>
+<h3><a id="AC_14"></a>AC代码</h3>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;bits/stdc++.h&gt;</span></span>
+
+using namespace std<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> N<span class="token punctuation">,</span>M<span class="token punctuation">,</span>appleNum<span class="token punctuation">,</span>cut<span class="token punctuation">,</span>count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>total<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>i<span class="token punctuation">,</span>j<span class="token punctuation">,</span>max<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>k<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> 
+	<span class="token comment">//N:苹果树总数  M:疏果个数  appleNum:苹果个数  </span>
+	<span class="token comment">//cut:疏果数  count:每一轮的疏果数  max:记录的最大疏果数 k:相应疏果数</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>N<span class="token punctuation">,</span><span class="token operator">&amp;</span>M<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> N<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment">//i=0开始表示第1棵树 </span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>appleNum<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> M<span class="token punctuation">;</span> j <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>cut<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			count <span class="token operator">+=</span> <span class="token function">abs</span><span class="token punctuation">(</span>cut<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//记录这棵树疏果总数</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>count <span class="token operator">&gt;</span> max<span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment">//如果count大于之前记录的最大数，记录下k：第几棵树，max为count </span>
+			max <span class="token operator">=</span> count<span class="token punctuation">;</span>
+			k <span class="token operator">=</span> i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		total <span class="token operator">=</span> total <span class="token operator">+</span> appleNum <span class="token operator">-</span> count<span class="token punctuation">;</span>   <span class="token comment">//求苹果总数</span>
+		count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d %d %d"</span><span class="token punctuation">,</span>total<span class="token punctuation">,</span>k<span class="token punctuation">,</span>max<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="2map_45"></a>解法2（map）</h2>
+<p>具体思路和解法1相同，只是在记录最大数这一步利用了map中insert方法中当遇到重复key时自动忽略的本质，此处将疏果数作为key，将下标作为value保存。</p>
+<h3><a id="AC_48"></a>AC代码</h3>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;bits/stdc++.h&gt;</span></span>
+
+using namespace std<span class="token punctuation">;</span>
+
+std<span class="token operator">::</span>map<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">int</span><span class="token punctuation">,</span>greater<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> <span class="token operator">&gt;</span> m<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> N<span class="token punctuation">,</span>M<span class="token punctuation">,</span>appleNum<span class="token punctuation">,</span>cut<span class="token punctuation">,</span>count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>total<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>i<span class="token punctuation">,</span>j<span class="token punctuation">;</span> 
+	<span class="token comment">//N:苹果树总数  M:疏果个数  appleNum:苹果个数  </span>
+	<span class="token comment">//cut:疏果数 total:所有苹果树的苹果总数</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>N<span class="token punctuation">,</span><span class="token operator">&amp;</span>M<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> N<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment">//i=0开始表示第1棵树 </span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>appleNum<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">for</span> <span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> M<span class="token punctuation">;</span> j <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>cut<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			count <span class="token operator">+=</span> <span class="token function">abs</span><span class="token punctuation">(</span>cut<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		m<span class="token punctuation">.</span><span class="token function">insert</span><span class="token punctuation">(</span>std<span class="token operator">::</span>pair<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>count<span class="token punctuation">,</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//map遇到相同键值插入自动忽略 </span>
+		total <span class="token operator">=</span> total <span class="token operator">+</span> appleNum <span class="token operator">-</span> count<span class="token punctuation">;</span>
+		count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	map<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">::</span>iterator it <span class="token operator">=</span> m<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//迭代器</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d %d %d"</span><span class="token punctuation">,</span>total<span class="token punctuation">,</span>it<span class="token operator">-&gt;</span>second <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span>it<span class="token operator">-&gt;</span>first<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>解法2比解法1代码长度、时间使用、空间使用都占用的更多。</p>
+</div>
+</body>
+
+</html>

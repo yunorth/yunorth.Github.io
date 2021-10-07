@@ -1,0 +1,693 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单向链表实现学生管理系统</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h2><a id="_0"></a>单向链表实现学生管理系统</h2>
+<p><em>2019-02-08/23:46:50</em></p>
+<h2><a id="_2"></a>题目说明</h2>
+<p>每个学生的信息包括：学号、姓名、性别、手机号码、数学分数、语文分数。程序使用链表结构完成以下管理功能：</p>
+<ol>
+<li>创建链表</li>
+<li>从键盘输入某个学生的信息，并将其插入链表中</li>
+<li>从键盘输入某个学生的学号，并将其从链表中删除</li>
+<li>对某个学生的信息的修改</li>
+<li>查询符合某个条件（允许条件与或非组合）的学生，并打印查询结果</li>
+<li>对学生按照某个信息进行排序并输出</li>
+</ol>
+<h3><a id="_12"></a>扩展功能</h3>
+<ol>
+<li>支持从Excel表格导入学生数据</li>
+<li>支持将链表中的内容导出到Excel表格</li>
+<li>对人数、性别、分数支持简单的统计功能，如总体人数，男女比例，各区间分数百分比计算等</li>
+</ol>
+<h3><a id="_17"></a>注意</h3>
+<ol>
+<li>管理功能属于基础功能，均应实现</li>
+<li>扩展功能属于加分项</li>
+<li>在扩展功能基础上，还可提出自己设想的功能并实现</li>
+</ol>
+<h3><a id="_22"></a>测试数据下载</h3>
+<p>链接： <a href="https://pan.baidu.com/s/1Sdoug7fmPOjgzszbKYhBPA">点击这里</a></p>
+<h2><a id="_25"></a>代码实现</h2>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdlib.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;string.h&gt;</span> </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">ERROR</span> <span class="token expression"><span class="token number">0</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">OK</span> <span class="token expression"><span class="token number">1</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">MAXSIZE</span> <span class="token expression"><span class="token number">100</span> </span><span class="token comment">//定义字符串最大长度</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">INIT_STRING</span> <span class="token expression"><span class="token punctuation">(</span>String<span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span><span class="token operator">*</span>MAXSIZE<span class="token punctuation">)</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">INIT_CHARS</span> <span class="token expression"><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span><span class="token operator">*</span>MAXSIZE<span class="token punctuation">)</span></span></span>
+
+<span class="token keyword">typedef</span> <span class="token keyword">int</span> Status<span class="token punctuation">;</span>
+<span class="token keyword">typedef</span> <span class="token keyword">char</span><span class="token operator">*</span> String<span class="token punctuation">;</span>
+
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">Stu</span> Student<span class="token punctuation">;</span>	<span class="token comment">//定义学生结构体 </span>
+<span class="token keyword">struct</span> <span class="token class-name">Stu</span><span class="token punctuation">{</span>
+	String id<span class="token punctuation">;</span>			<span class="token comment">//学号 </span>
+	String name<span class="token punctuation">;</span>		<span class="token comment">//姓名</span>
+	String sex<span class="token punctuation">;</span>			<span class="token comment">//性别</span>
+	String telephone<span class="token punctuation">;</span>	<span class="token comment">//电话</span>
+	<span class="token keyword">int</span> math<span class="token punctuation">;</span>			<span class="token comment">//数学成绩</span>
+	<span class="token keyword">int</span> Chinese<span class="token punctuation">;</span>		<span class="token comment">//语文成绩</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">node</span> Node<span class="token punctuation">;</span>	<span class="token comment">//定义链表结点 </span>
+<span class="token keyword">struct</span> <span class="token class-name">node</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> next<span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> data<span class="token punctuation">;</span>	<span class="token comment">//学生结构体 </span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">typedef</span> Node Head<span class="token punctuation">;</span>
+
+<span class="token comment">//*/</span>
+<span class="token comment">//函数声明</span>
+Head<span class="token operator">*</span> <span class="token function">initList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//初始化链表 </span>
+Head<span class="token operator">*</span> <span class="token function">initFromDataFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>			<span class="token comment">//初始化数据</span>
+Student<span class="token operator">*</span> <span class="token function">makeStudent</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>String name<span class="token punctuation">,</span>String sex<span class="token punctuation">,</span>String telephone<span class="token punctuation">,</span><span class="token keyword">int</span> math<span class="token punctuation">,</span><span class="token keyword">int</span> Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//创建学生结构体并赋值 </span>
+Student<span class="token operator">*</span> <span class="token function">findStu</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//查找单个学生信息 </span>
+Node<span class="token operator">*</span> <span class="token function">createNode</span><span class="token punctuation">(</span>Student<span class="token operator">*</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//创建节点并赋值 </span>
+Status <span class="token function">insertItemAtEnd</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">,</span>Student<span class="token operator">*</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>  	<span class="token comment">//插入 </span>
+Status <span class="token function">deleteStuByID</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">//删除学生信息  </span>
+Status <span class="token function">modifyMenu</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//修改信息菜单 </span>
+Status <span class="token function">countAll</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span> 				<span class="token comment">//统计全部人数 </span>
+Status <span class="token function">countSex</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span> 	<span class="token comment">//根据性别统计人数</span>
+String <span class="token function">strrpl</span><span class="token punctuation">(</span>String str<span class="token punctuation">)</span><span class="token punctuation">;</span>					<span class="token comment">//字符串替换 </span>
+<span class="token keyword">void</span> <span class="token function">save</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>						<span class="token comment">//保存新文件</span>
+<span class="token keyword">void</span> <span class="token function">list</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span> 						<span class="token comment">//打印学生列表 </span>
+<span class="token keyword">void</span> <span class="token function">modifyID</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//修改学号</span>
+<span class="token keyword">void</span> <span class="token function">modifyName</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span> 			<span class="token comment">//修改姓名</span>
+<span class="token keyword">void</span> <span class="token function">modifySex</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>			<span class="token comment">//修改性别</span>
+<span class="token keyword">void</span> <span class="token function">modifyTelephone</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//修改手机号</span>
+<span class="token keyword">void</span> <span class="token function">modifyMath</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>			<span class="token comment">//修改数学成绩</span>
+<span class="token keyword">void</span> <span class="token function">modifyChinese</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//修改语文成绩</span>
+<span class="token keyword">void</span> <span class="token function">sortByMath</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//按数学成绩降序</span>
+<span class="token keyword">void</span> <span class="token function">sortByChinese</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//按语文成绩降序 </span>
+<span class="token keyword">void</span> <span class="token function">sortByID</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>					<span class="token comment">//按学号升序 </span>
+<span class="token keyword">void</span> <span class="token function">searchMathPass</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//查找数学成绩在规定分数线以上的同学 </span>
+<span class="token keyword">void</span> <span class="token function">searchChinesePass</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//查找语文成绩在规定分数线以上的同学 </span>
+<span class="token keyword">void</span> <span class="token function">searchGrade</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>		<span class="token comment">//查找语文数学都符合要求的同学</span>
+<span class="token keyword">void</span> <span class="token function">Menu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span> 						<span class="token comment">//主菜单 </span>
+<span class="token keyword">void</span> <span class="token function">sortMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>					<span class="token comment">//排序菜单 </span>
+<span class="token keyword">void</span> <span class="token function">searchMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span> 				<span class="token comment">//条件查询菜单</span>
+<span class="token keyword">void</span> <span class="token function">countMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>					<span class="token comment">//统计菜单 </span>
+<span class="token keyword">void</span> <span class="token function">insertMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">;</span>				<span class="token comment">//插入菜单 </span>
+<span class="token comment">//*/</span>
+
+<span class="token comment">/*
+ *@function：initList 初始化链表 
+ *@param：	 NULL 
+ *@return：  head:头结点指针 
+ */</span>
+Head<span class="token operator">*</span> <span class="token function">initList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Head<span class="token operator">*</span> head <span class="token operator">=</span> <span class="token punctuation">(</span>Head<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Head<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	head<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> head<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：makeStudent 创建学生结构体并赋值 
+ *@param：  学生结构体各个元素 
+ *@return： st:新的学生结构体指针 
+ */</span> 
+Student<span class="token operator">*</span> <span class="token function">makeStudent</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>String name<span class="token punctuation">,</span>String sex<span class="token punctuation">,</span>String telephone<span class="token punctuation">,</span><span class="token keyword">int</span> math<span class="token punctuation">,</span><span class="token keyword">int</span> Chinese<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Student<span class="token operator">*</span> st <span class="token operator">=</span> <span class="token punctuation">(</span>Student<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Student<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>id <span class="token operator">=</span> id<span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>name <span class="token operator">=</span> name<span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>sex <span class="token operator">=</span> sex<span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>telephone <span class="token operator">=</span> telephone<span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>math <span class="token operator">=</span> math<span class="token punctuation">;</span>
+	st<span class="token operator">-&gt;</span>Chinese <span class="token operator">=</span> Chinese<span class="token punctuation">;</span>
+	<span class="token keyword">return</span> st<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/* 
+ *@function：createNode 创建节点并赋值
+ *@param：  学生结构体指针 
+ *@return： np:包含新学生结构体的新结点指针 
+ */</span> 
+Node<span class="token operator">*</span> <span class="token function">createNode</span><span class="token punctuation">(</span>Student<span class="token operator">*</span> data<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token punctuation">(</span>Node<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Node<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	np<span class="token operator">-&gt;</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>	<span class="token comment">//将学生结构体赋值给data </span>
+	<span class="token keyword">return</span> np<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：insertItemAtEnd 在末尾插入新数据（新结点-&gt;学生结构体）
+ *@param：   *head:链表头结点指针  *data:学生结构体指针 
+ *@return：  1
+ */</span> 
+Status <span class="token function">insertItemAtEnd</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">,</span>Student<span class="token operator">*</span> data<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Student<span class="token operator">*</span> newData <span class="token operator">=</span> <span class="token function">makeStudent</span><span class="token punctuation">(</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>data<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>data<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>head<span class="token operator">-&gt;</span>next<span class="token operator">==</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		head<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token function">createNode</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		head<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	np<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token function">createNode</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：save 保存新数据 
+ *@param：   *head:链表头结点指针
+ *@return：  NULL
+ */</span> 
+<span class="token keyword">void</span> <span class="token function">save</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">remove</span><span class="token punctuation">(</span><span class="token string">"data.csv"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	FILE<span class="token operator">*</span>fp<span class="token punctuation">;</span>
+	fp <span class="token operator">=</span> <span class="token function">fopen</span><span class="token punctuation">(</span><span class="token string">"data.csv"</span><span class="token punctuation">,</span><span class="token string">"w+"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token function">fprintf</span><span class="token punctuation">(</span>fp<span class="token punctuation">,</span><span class="token string">"%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">fclose</span><span class="token punctuation">(</span>fp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：list 遍历学生列表信息 
+ *@param：   *head:链表头结点指针
+ *@return：  NULL
+ */</span> 
+<span class="token keyword">void</span> <span class="token function">list</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------学生信息列表如下----------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号：%s 姓名：%s 性别：%s手机号：%s 数学：%d,语文：%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：deleteStuByID 通过学号删除学生信息 
+ *@param：   *head:链表头结点指针
+ *@return：  NULL
+ */</span> 
+Status <span class="token function">deleteStuByID</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	String id <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入要删除的学生学号："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">strcmp</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>id<span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			np<span class="token operator">-&gt;</span>next <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+			<span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+			np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span> 
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"-------------删除完毕-------------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">list</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：findStu 通过学号查找单个学生信息 
+ *@param：   String id:学生学号 *head:链表头结点指针
+ *@return：  学生结构体 
+ */</span> 
+Student<span class="token operator">*</span> <span class="token function">findStu</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> flag <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">strcmp</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>id<span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			flag <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+			<span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+			np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>flag<span class="token operator">==</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">return</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+
+<span class="token comment">//修改学号 </span>
+<span class="token keyword">void</span> <span class="token function">modifyID</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	String newID <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"输入新学号："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>newID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">strcpy</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>newID<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改姓名 </span>
+<span class="token keyword">void</span> <span class="token function">modifyName</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	String newName <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入新名字："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>newName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">strcpy</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>newName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改性别 </span>
+<span class="token keyword">void</span> <span class="token function">modifySex</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	String newSex <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入新性别："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>newSex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">strcpy</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>newSex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改手机号 </span>
+<span class="token keyword">void</span> <span class="token function">modifyTelephone</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	String newTelephone <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入新手机号："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>newTelephone<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">strcpy</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>newTelephone<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改数学成绩 </span>
+<span class="token keyword">void</span> <span class="token function">modifyMath</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> newMath <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入新数学成绩："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>newMath<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	np<span class="token operator">-&gt;</span>math <span class="token operator">=</span> newMath<span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改语文成绩 </span>
+<span class="token keyword">void</span> <span class="token function">modifyChinese</span><span class="token punctuation">(</span>String id<span class="token punctuation">,</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> newChinese <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入新语文成绩："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>newChinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	np<span class="token operator">-&gt;</span>Chinese <span class="token operator">=</span> newChinese<span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"修改完毕，该学生信息变更为：%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//修改信息菜单 </span>
+Status <span class="token function">modifyMenu</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	String id <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> flag <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入要修改的学生的学号："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Student<span class="token operator">*</span> np <span class="token operator">=</span> <span class="token function">findStu</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"这是否是您要修改的学生？输入1确认，0否认\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s,%s,%s,%s,%d,%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>telephone<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>flag<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>flag<span class="token operator">==</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------请选择--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"1、修改学号\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"2、修改姓名\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"3、修改性别\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"4、修改手机号\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"5、修改数学成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"6、修改语文成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">//modifyName(id,head);</span>
+			<span class="token comment">//*/</span>
+			<span class="token keyword">switch</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">{</span>
+				<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span> <span class="token function">modifyID</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+				<span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span>	<span class="token function">modifyName</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+				<span class="token keyword">case</span> <span class="token number">3</span><span class="token operator">:</span>	<span class="token function">modifySex</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+				<span class="token keyword">case</span> <span class="token number">4</span><span class="token operator">:</span> <span class="token function">modifyTelephone</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+				<span class="token keyword">case</span> <span class="token number">5</span><span class="token operator">:</span>	<span class="token function">modifyMath</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+				<span class="token keyword">case</span> <span class="token number">6</span><span class="token operator">:</span> <span class="token function">modifyChinese</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+			<span class="token comment">//*/</span>
+		<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"您输入的学号好像存在错误，后台小姐姐找不到别的学号QAQ请返回重新输入！\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号不存在！\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//*/</span>
+
+<span class="token comment">//*/</span>
+<span class="token comment">//按照学号升序 </span>
+<span class="token keyword">void</span> <span class="token function">sortByID</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Student<span class="token operator">*</span> t <span class="token operator">=</span> <span class="token punctuation">(</span>Student<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Student<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>temp <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>temp<span class="token punctuation">;</span>temp<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>temp<span class="token operator">=</span>temp<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span>np<span class="token punctuation">;</span>np<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>np<span class="token operator">=</span>np<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">atoi</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token function">atoi</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+				t <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data <span class="token operator">=</span> np<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>data <span class="token operator">=</span> t<span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按学号排序结果为----------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">list</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+
+<span class="token comment">//按照数学成绩降序 </span>
+<span class="token keyword">void</span> <span class="token function">sortByMath</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Student<span class="token operator">*</span> t <span class="token operator">=</span> <span class="token punctuation">(</span>Student<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Student<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>temp <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>temp<span class="token punctuation">;</span>temp<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>temp<span class="token operator">=</span>temp<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span>np<span class="token punctuation">;</span>np<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>np<span class="token operator">=</span>np<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math <span class="token operator">&lt;</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">)</span><span class="token punctuation">{</span>
+				t <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data <span class="token operator">=</span> np<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>data <span class="token operator">=</span> t<span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按数学成绩降序排序结果为--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">list</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+
+<span class="token comment">//按照语文成绩降序 </span>
+<span class="token keyword">void</span> <span class="token function">sortByChinese</span><span class="token punctuation">(</span>Head <span class="token operator">*</span>head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Student<span class="token operator">*</span> t <span class="token operator">=</span> <span class="token punctuation">(</span>Student<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>Student<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>temp <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	Node <span class="token operator">*</span>np <span class="token operator">=</span> head<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>temp<span class="token punctuation">;</span>temp<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>temp<span class="token operator">=</span>temp<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span>np<span class="token punctuation">;</span>np<span class="token operator">-&gt;</span>next<span class="token operator">!=</span><span class="token constant">NULL</span><span class="token punctuation">;</span>np<span class="token operator">=</span>np<span class="token operator">-&gt;</span>next<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token operator">&lt;</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">{</span>
+				t <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>next<span class="token operator">-&gt;</span>data <span class="token operator">=</span> np<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+				np<span class="token operator">-&gt;</span>data <span class="token operator">=</span> t<span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按语文成绩降序排序结果为--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">list</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+
+<span class="token comment">//*/</span>
+
+<span class="token comment">/*
+ *@function：strrpl 字符串替换：把","替换成" " 
+ *@param：   String str
+ *@return：  String str
+ */</span> 
+String <span class="token function">strrpl</span><span class="token punctuation">(</span>String str<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">char</span> ch <span class="token operator">=</span> <span class="token string">','</span><span class="token punctuation">,</span>new_ch <span class="token operator">=</span> <span class="token string">' '</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token function">strlen</span><span class="token punctuation">(</span>str<span class="token punctuation">)</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span> 
+		<span class="token keyword">if</span><span class="token punctuation">(</span>str<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">==</span>ch<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			str<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token operator">=</span>new_ch<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> str<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+
+<span class="token comment">/*
+ *初始化数据
+ */</span> 
+Head<span class="token operator">*</span> <span class="token function">initFromDataFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">char</span><span class="token operator">*</span> filepath <span class="token operator">=</span> <span class="token string">"C:\\Users\\Adminisator\\Desktop\\学习\\数据结构\\大作业1\\代码\\学生管理系统\\2\\data.csv"</span><span class="token punctuation">;</span>
+	FILE<span class="token operator">*</span> fp <span class="token operator">=</span> <span class="token function">fopen</span><span class="token punctuation">(</span>filepath<span class="token punctuation">,</span><span class="token string">"r"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>fp <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"read data file error"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	Head<span class="token operator">*</span> head <span class="token operator">=</span> <span class="token function">initList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">feof</span><span class="token punctuation">(</span>fp<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		String id <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+		String name <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+		String sex <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+		String telephone <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+		<span class="token keyword">int</span> chinese <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+		<span class="token keyword">int</span> math <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+		String temp <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+		String str <span class="token operator">=</span>INIT_STRING<span class="token punctuation">;</span>
+		<span class="token function">fscanf</span><span class="token punctuation">(</span>fp<span class="token punctuation">,</span><span class="token string">"%s\n"</span><span class="token punctuation">,</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		str <span class="token operator">=</span> <span class="token function">strrpl</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token comment">//printf("str:%s\n",str);</span>
+		<span class="token comment">//system("chcp 65001"); // set output charset as GBK</span>
+		<span class="token function">sscanf</span><span class="token punctuation">(</span>str<span class="token punctuation">,</span><span class="token string">"%s %s %s %s %d %d\n"</span><span class="token punctuation">,</span>id<span class="token punctuation">,</span>name<span class="token punctuation">,</span>sex<span class="token punctuation">,</span>telephone<span class="token punctuation">,</span><span class="token operator">&amp;</span>math<span class="token punctuation">,</span><span class="token operator">&amp;</span>chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token function">insertItemAtEnd</span><span class="token punctuation">(</span>head<span class="token punctuation">,</span><span class="token function">makeStudent</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>name<span class="token punctuation">,</span>sex<span class="token punctuation">,</span>telephone<span class="token punctuation">,</span>math<span class="token punctuation">,</span>chinese<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">fclose</span><span class="token punctuation">(</span>fp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span> head<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+
+<span class="token comment">/*
+ *@function：searchMathPass 查找数学成绩在规定分数线以上的同学 
+ *@param：   *head:链表头结点指针
+ *@return：  NULL
+ */</span> 
+<span class="token keyword">void</span> <span class="token function">searchMathPass</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>Score<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入分数线："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>Score<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------符合要求的同学如下--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math <span class="token operator">&gt;=</span> Score<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号为%s的学生%s数学成绩为%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			count<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>count<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------共有%d个同学数学成绩在%d分以上--------\n"</span><span class="token punctuation">,</span>count<span class="token punctuation">,</span>Score<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------没有同学符合要求--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：searchChinesePass 查找语文成绩在规定分数线以上的同学
+ *@param：   *head:链表头结点指针 
+ *@return：  NULL
+ */</span> 
+<span class="token keyword">void</span> <span class="token function">searchChinesePass</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>Score<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入分数线："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>Score<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------符合要求的同学如下--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese <span class="token operator">&gt;=</span> Score<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号为%s的学生%s语文成绩为%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			count<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>count<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------共有%d个同学语文成绩在%d分以上--------\n"</span><span class="token punctuation">,</span>count<span class="token punctuation">,</span>Score<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------没有同学符合要求--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+
+<span class="token comment">/*
+ *@function：searchGrade 查找语文数学都符合要求的同学
+ *@param：   *head:链表头结点指针 
+ *@return：  NULL
+ */</span> 
+<span class="token keyword">void</span> <span class="token function">searchGrade</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> count<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>MathScore<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">,</span>ChineseScore<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入数学分数线："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>MathScore<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入语文分数线："</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>ChineseScore<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------符合要求的同学如下--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math <span class="token operator">&gt;=</span> MathScore <span class="token operator">&amp;&amp;</span> np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese <span class="token operator">&gt;=</span> ChineseScore<span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号为%s的学生%s数学成绩为%d，语文成绩为%d\n"</span><span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>name<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>math<span class="token punctuation">,</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>Chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			count<span class="token operator">++</span><span class="token punctuation">;</span> 
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>count<span class="token operator">&gt;</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------共有%d个同学符合要求--------\n"</span><span class="token punctuation">,</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------没有同学符合要求--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：countAll 统计全部人数 
+ *@param：   *head:链表头结点指针 
+ *@return：  count:总人数 
+ */</span>
+Status <span class="token function">countAll</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>id <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			count<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> count<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：countSex 根据性别统计人数 
+ *@param：   *head:链表头结点指针 String sex：要统计的性别 
+ *@return：  NULL 
+ */</span>
+Status <span class="token function">countSex</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	String sex <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入你要统计的性别：（1表示男，0表示女）\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span>sex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	Node<span class="token operator">*</span> np <span class="token operator">=</span> head<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>next <span class="token operator">!=</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		np <span class="token operator">=</span> np<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">strcmp</span><span class="token punctuation">(</span>np<span class="token operator">-&gt;</span>data<span class="token operator">-&gt;</span>sex<span class="token punctuation">,</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			count<span class="token operator">++</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">strcmp</span><span class="token punctuation">(</span>sex<span class="token punctuation">,</span><span class="token string">"1"</span><span class="token punctuation">)</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------男生一共有%d个--------\n"</span><span class="token punctuation">,</span>count<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------女生一共有%d个--------\n"</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token function">countAll</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token operator">-</span>count<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//插入菜单 </span>
+<span class="token keyword">void</span> <span class="token function">insertMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	String id <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	String name <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	String sex <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	String telephone <span class="token operator">=</span> INIT_STRING<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> chinese <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> math <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"请输入学生信息（请严格以空格分隔因为我没有写报错）：\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"学号\t姓名\t性别\t手机号\t数学成绩\t语文成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%s %s %s %s %d %d"</span><span class="token punctuation">,</span>id<span class="token punctuation">,</span>name<span class="token punctuation">,</span>sex<span class="token punctuation">,</span>telephone<span class="token punctuation">,</span><span class="token operator">&amp;</span>math<span class="token punctuation">,</span><span class="token operator">&amp;</span>chinese<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">insertItemAtEnd</span><span class="token punctuation">(</span>head<span class="token punctuation">,</span><span class="token function">makeStudent</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span>name<span class="token punctuation">,</span>sex<span class="token punctuation">,</span>telephone<span class="token punctuation">,</span>math<span class="token punctuation">,</span>chinese<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------插入成功--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">list</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//排序菜单 </span>
+<span class="token keyword">void</span> <span class="token function">sortMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------请选择--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"1、按学号排序\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"2、按数学成绩降序\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"3、按语文成绩降序\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">switch</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span> <span class="token function">sortByID</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span> <span class="token function">sortByMath</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">3</span><span class="token operator">:</span> <span class="token function">sortByChinese</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//条件查询菜单 </span>
+<span class="token keyword">void</span> <span class="token function">searchMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------请选择--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"1、查询数学成绩大于规定分数线同学的成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"2、查询语文成绩大于规定分数线同学的成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"3、查询同时符合数学、语文分数线同学的成绩\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">switch</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span> <span class="token function">searchMathPass</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span> <span class="token function">searchChinesePass</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">3</span><span class="token operator">:</span> <span class="token function">searchGrade</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//统计菜单 </span>
+<span class="token keyword">void</span> <span class="token function">countMenu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------请选择--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"1、查看人数统计\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"2、根据性别统计\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">switch</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span> <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------共有%d个人--------\n"</span><span class="token punctuation">,</span><span class="token function">countAll</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span> <span class="token function">countSex</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------按任意键返回主菜单--------"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">getch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">return</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//主菜单 </span>
+<span class="token keyword">void</span> <span class="token function">Menu</span><span class="token punctuation">(</span>Head<span class="token operator">*</span> head<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token function">system</span><span class="token punctuation">(</span><span class="token string">"cls"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"--------您已进入学生管理系统--------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"----------------请选择--------------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"1、添加学生信息\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"2、删除学生信息\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"3、修改学生信息\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"4、查看排序\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"5、条件查询\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"6、人数统计\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"7、保存并退出\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">switch</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">case</span> <span class="token number">1</span><span class="token operator">:</span> <span class="token function">insertMenu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">2</span><span class="token operator">:</span>	<span class="token function">deleteStuByID</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">3</span><span class="token operator">:</span> <span class="token function">modifyMenu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">4</span><span class="token operator">:</span> <span class="token function">sortMenu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">5</span><span class="token operator">:</span> <span class="token function">searchMenu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">6</span><span class="token operator">:</span> <span class="token function">countMenu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">break</span><span class="token punctuation">;</span>
+		<span class="token keyword">case</span> <span class="token number">7</span><span class="token operator">:</span> <span class="token function">save</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token punctuation">}</span> 
+	
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	Head<span class="token operator">*</span> head <span class="token operator">=</span> <span class="token function">initFromDataFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">Menu</span><span class="token punctuation">(</span>head<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div>
+</body>
+
+</html>

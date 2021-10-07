@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | PAT Advanced 1015 Reversible Primes（思路分析）</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1><a id="__PAT_Advanced_1015_Reversible_Primes_0"></a>小白编程 | PAT Advanced 1015 Reversible Primes（思路分析）</h1>
+<p><em>2020-02-09 /16:24:10</em></p>
+<h2><a id="PAT_Advanced_1015_Reversible_Primes_2"></a>PAT Advanced 1015 Reversible Primes（思路分析）</h2>
+<p><em>纠错/交流/讨论联系右侧邮箱</em></p>
+<blockquote>
+<p>A reversible prime in any number system is a prime whose “reverse” in that number system is also a prime. For example in the decimal system 73 is a reversible prime because its reverse 37 is also a prime.</p>
+<p>Now given any two positive integers N (&lt;10<sup>5</sup>) and D (1&lt;D≤10), you are supposed to tell if N is a reversible prime with radix D.</p>
+<h5><a id="Input_Specification_10"></a>Input Specification:</h5>
+<p>The input file consists of several test cases. Each case occupies a line which contains two integers N and D. The input is finished by a negative N.</p>
+<h5><a id="Output_Specification_12"></a>Output Specification:</h5>
+<p>For each test case, print in one line Yes if N is a reversible prime with radix D, or No if not.</p>
+<h5><a id="Sample_Input_14"></a>Sample Input:</h5>
+<pre><code>73 10
+23 2
+23 10
+-2
+</code></pre>
+<h5><a id="Sample_Output_21"></a>Sample Output:</h5>
+<pre><code>Yes
+Yes
+No
+</code></pre>
+<p>题目大意：</p>
+<ol>
+<li>判断一个十进制数N自身是否是素数</li>
+<li>判断这个十进制数按照所给出进制D转换后的翻转数转换为十进制后是否是素数</li>
+<li>满足以上两个条件的数输出Yes，不满足的输出No</li>
+</ol>
+<p>例如：</p>
+<p>73是素数，73按照10进制转换后的翻转数为37是素数。故73满足题目要求。</p>
+<p>23是素数，23按照2进制转换后为10111，翻转后为11101，再转换为十进制为29，29是素数。故23满足题目要求。</p>
+</blockquote>
+<h3><a id="_38"></a>解题思路</h3>
+<ol>
+<li>先判断N是否是素数</li>
+<li>再把N按照D转换后变成一个翻转数</li>
+<li>再把3的翻转数转换成十进制</li>
+<li>再判断一次该数是否为素数</li>
+<li>如果同时满足1和4则输出Yes</li>
+</ol>
+<h4><a id="_45"></a>涉及方法</h4>
+<ol>
+<li>判断一个数是否为素数</li>
+<li>将十进制数转换为其他进制D（D&lt;10）</li>
+<li>将其他进制转换为十进制</li>
+</ol>
+<h3><a id="AC_51"></a>代码（AC）</h3>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;bits/stdc++.h&gt;</span> <span class="token comment">//万能头 </span></span>
+
+using namespace std<span class="token punctuation">;</span>
+ 
+<span class="token comment">/*
+ *@function：prime 判断是否为素数 
+ *@param：	 int N
+ *@return：  flag:判断标志（1代表是素数，0代表不是素数） 
+ */</span>
+<span class="token keyword">int</span> <span class="token function">prime</span><span class="token punctuation">(</span><span class="token keyword">int</span> N<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> flag <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">//flag = 1是素数 </span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>N <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">||</span> N <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> N<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			<span class="token keyword">if</span><span class="token punctuation">(</span>N <span class="token operator">%</span> i <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+				flag <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+				<span class="token keyword">break</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> flag<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：converse 其他进制转换为十进制，仅用于D&lt;10 
+ *@param：	 vector&lt;int&gt; s:不定长数组，要求存有倒序的进制数（这里解释一下为什么是倒序是，题目要求翻转，根据数学的二除法计算出来本来就是倒序的，所以不需要做翻转了）
+ 			 int D: 原本进制 
+ *@return：  十进制数
+ */</span>
+<span class="token keyword">int</span>  <span class="token function">converse</span><span class="token punctuation">(</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> s<span class="token punctuation">,</span> <span class="token keyword">int</span> D<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> s<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		n <span class="token operator">=</span> n <span class="token operator">+</span> s<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">*</span> <span class="token function">pow</span><span class="token punctuation">(</span>D<span class="token punctuation">,</span>s<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">-</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">return</span> n<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/*
+ *@function：getNumber 获取十进制转换为其他进制后翻转过后再转换为十进制的数
+ *@param：	 int N:十进制数，int D:进制要求 
+ *@return：  十进制数
+ */</span>
+<span class="token keyword">int</span> <span class="token function">getNumber</span><span class="token punctuation">(</span><span class="token keyword">int</span> N<span class="token punctuation">,</span> <span class="token keyword">int</span> D<span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> t <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> s<span class="token punctuation">;</span> 
+	<span class="token keyword">while</span><span class="token punctuation">(</span>N<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		s<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span> N <span class="token operator">%</span> D<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//除法倒着存的 正好反过来 不需要二次翻转了 </span>
+		N <span class="token operator">=</span> N<span class="token operator">/</span>D<span class="token punctuation">;</span>
+		i<span class="token operator">++</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> s<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>D <span class="token operator">==</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token comment">//这一段用于把数组变成十进制数 </span>
+		<span class="token keyword">for</span><span class="token punctuation">(</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			N <span class="token operator">=</span> N <span class="token operator">*</span><span class="token number">10</span> <span class="token operator">+</span> s<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">return</span> N<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>	
+		<span class="token comment">//用于把非十进制的数转成十进制 </span>
+		N <span class="token operator">=</span> <span class="token function">converse</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>D<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> N<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> N<span class="token punctuation">,</span>D<span class="token punctuation">,</span>t<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">//N:整数 D:进制 t:临时变量 </span>
+	vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> v1<span class="token punctuation">,</span>v2<span class="token punctuation">;</span> 	<span class="token comment">//两个不定长数组用于接收本身和转换后是否为素数的标志 </span>
+	bool flag <span class="token operator">=</span> true<span class="token punctuation">;</span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span>flag<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>N<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>N <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			flag <span class="token operator">=</span> false<span class="token punctuation">;</span>
+			<span class="token keyword">continue</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>D<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		t <span class="token operator">=</span> <span class="token function">prime</span><span class="token punctuation">(</span>N<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//先判断它自己是不是素数 </span>
+		v1<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		N <span class="token operator">=</span> <span class="token function">getNumber</span><span class="token punctuation">(</span>N<span class="token punctuation">,</span>D<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//获取经过一系列题目要求操作以后的数 </span>
+		t <span class="token operator">=</span> <span class="token function">prime</span><span class="token punctuation">(</span>N<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">//再判断是否是素数 </span>
+		v2<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+	<span class="token punctuation">}</span>
+	
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> j<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>j<span class="token operator">&lt;</span>v2<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>j<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>v1<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> v2<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">{</span>	<span class="token comment">//如果两个都是素数的话则该数符合要求 </span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Yes\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+			<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"No\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+ 	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+
+</code></pre>
+<h3><a id="_152"></a>要点</h3>
+<ol>
+<li>万能文件头<code>#include &lt;bits/stdc++.h&gt;</code>包含下列所有文件头</li>
+</ol>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;cstdio&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;fstream&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;algorithm&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;cmath&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;deque&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;vector&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;queue&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;string&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;cstring&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;map&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stack&gt;</span>  </span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;set&gt;</span></span>
+</code></pre>
+<ol start="2">
+<li>判断素数这个最基本的函数要会写吧</li>
+<li>如果把vector换成定长数组char s[1000]的话翻转的时候未赋值的下标的值会为0，会出错，所以我觉得不能用定长数组。</li>
+</ol>
+</div>
+</body>
+
+</html>

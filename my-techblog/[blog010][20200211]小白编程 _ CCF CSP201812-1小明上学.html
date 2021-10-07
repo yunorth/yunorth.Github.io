@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | CCF CSP201812-1小明上学</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h2><a id="__CCF_CSP2018121_0"></a>小白编程 | CCF CSP201812-1小明上学</h2>
+<p><em>2020-02-11 15:23:26</em></p>
+<h2><a id="CCF_CSP2018121_4"></a>CCF CSP201812-1小明上学</h2>
+<p><em>纠错联系右侧邮箱</em></p>
+<h2><a id="_8"></a>解题思路</h2>
+<p>按照题目要求一个一个判断就可以了。</p>
+<h2><a id="AC_11"></a>AC代码</h2>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span><span class="token string">&lt;bits/stdc++.h&gt;</span></span>
+
+using namespace std<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">int</span> r<span class="token punctuation">,</span> y<span class="token punctuation">,</span> g<span class="token punctuation">,</span> n<span class="token punctuation">,</span> time <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>	
+	<span class="token comment">//r:红灯 y:黄灯 g:绿灯 n:路段数+红绿灯数 time:总耗时</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d %d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>r<span class="token punctuation">,</span> <span class="token operator">&amp;</span>y<span class="token punctuation">,</span> <span class="token operator">&amp;</span>g<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n <span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">int</span> k<span class="token punctuation">,</span> t<span class="token punctuation">;</span>
+		<span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d %d"</span><span class="token punctuation">,</span><span class="token operator">&amp;</span>k<span class="token punctuation">,</span><span class="token operator">&amp;</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>k <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			time <span class="token operator">=</span> time <span class="token operator">+</span> t<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>k <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			time <span class="token operator">=</span> time <span class="token operator">+</span> t<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>k <span class="token operator">==</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			time <span class="token operator">=</span> time <span class="token operator">+</span> t <span class="token operator">+</span> r<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>k <span class="token operator">==</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+			time <span class="token operator">=</span> time <span class="token operator">+</span> <span class="token number">0</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span>time<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	 
+<span class="token punctuation">}</span>
+</code></pre>
+</div>
+</body>
+
+</html>

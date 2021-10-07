@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小白编程 | PAT Advanced 1023 Have Fun with Numbers（思路分析）</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1><a id="__PAT_Advanced_1023_Have_Fun_with_Numbers_0"></a>小白编程 | PAT Advanced 1023 Have Fun with Numbers（思路分析）</h1>
+<p><em>2020-02-12/ 23:21:25</em></p>
+<h2><a id="PAT_Advanced_1023_Have_Fun_with_Numbers_2"></a>PAT Advanced 1023 Have Fun with Numbers（思路分析）</h2>
+<p><em>纠错联系右侧邮箱</em></p>
+<blockquote>
+<p>Notice that the number 123456789 is a 9-digit number consisting exactly the numbers from 1 to 9, with no duplication. Double it we will obtain 246913578, which happens to be another 9-digit number consisting exactly the numbers from 1 to 9, only in a different permutation. Check to see the result if we double it again!</p>
+<p>Now you are suppose to check if there are more numbers with this property. That is, double a given number with k digits, you are to tell if the resulting number consists of only a permutation of the digits in the original number.</p>
+<h5><a id="Input_Specification_9"></a>Input Specification:</h5>
+<p>Each input contains one test case. Each case contains one positive integer with no more than 20 digits.</p>
+<h5><a id="Output_Specification_11"></a>Output Specification:</h5>
+<p>For each test case, first print in a line “Yes” if doubling the input number gives a number that consists of only a permutation of the digits in the original number, or “No” if not. Then in the next line, print the doubled number.</p>
+<h5><a id="Sample_Input_14"></a>Sample Input:</h5>
+<pre><code>1234567899
+</code></pre>
+<h5><a id="Sample_Output_18"></a>Sample Output:</h5>
+<pre><code>Yes
+2469135798
+</code></pre>
+<h6><a id="_24"></a>题目大意：</h6>
+<p>给出一个大整数（&lt;=20位），判断该数在翻倍以后是还是原数组成的数字。</p>
+</blockquote>
+<h3><a id="_28"></a>解题思路</h3>
+<ol>
+<li>
+<p>怎么把这个大整数存下来：可以用字符数组、string等方式</p>
+</li>
+<li>
+<p>翻倍以后进位怎么计算：</p>
+<p>本文使用stack栈的存储方式正向压入数字，通过弹出栈顶元素来计算以后再重新压入新栈。若最后一位翻倍后大于10，则直接在栈顶压入1。最后弹出新栈栈顶元素即为所求。</p>
+</li>
+<li>
+<p>如何判断得出的新数字是原数的新排列（满足：数字个数不多不少刚刚好，只是打乱了顺序）</p>
+<p>一开始我想通过一个一个记录下出现的次数来判断，后来发现太麻烦了。后来看见一个老哥直接给两个数字排了个序对比了一下，这个方法挺好用的，不仅快还准。</p>
+</li>
+</ol>
+<h3><a id="AC_38"></a>AC代码</h3>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;bits/stdc++.h&gt;</span></span>
+
+using namespace std<span class="token punctuation">;</span>
+
+stack<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> s1<span class="token punctuation">,</span>s2<span class="token punctuation">;</span>	
+<span class="token comment">//s1:用来承接输入的数字  s2:用来输出结果 </span>
+ 
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	string str<span class="token punctuation">,</span>str2<span class="token punctuation">;</span> <span class="token comment">//str：输入大整数 str2:输出结果 </span>
+	cin <span class="token operator">&gt;&gt;</span> str<span class="token punctuation">;</span>
+	<span class="token keyword">int</span> len <span class="token operator">=</span> str<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	
+	<span class="token comment">//将字符转为数字存入栈s1中 </span>
+	<span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> len<span class="token punctuation">;</span> i <span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token keyword">int</span> num <span class="token operator">=</span> str<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token string">'0'</span><span class="token punctuation">;</span>
+		s1<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	
+	<span class="token comment">//将s1栈顶元素依次弹出翻倍计算后存入栈s2中 </span>
+	<span class="token keyword">int</span> n <span class="token operator">=</span> <span class="token number">0</span> <span class="token punctuation">,</span> t <span class="token operator">=</span> <span class="token number">0</span> <span class="token punctuation">;</span>
+	<span class="token comment">// n: 计算结果 t:进位  </span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span>s1<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		n <span class="token operator">=</span> s1<span class="token punctuation">.</span><span class="token function">top</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">%</span> <span class="token number">10</span> <span class="token operator">+</span> t<span class="token punctuation">;</span>	<span class="token comment">//翻倍-&gt;求余数-&gt;加进位 </span>
+		str2<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span><span class="token string">'0'</span> <span class="token operator">+</span> n<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+		t <span class="token operator">=</span> s1<span class="token punctuation">.</span><span class="token function">top</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">/</span> <span class="token number">10</span><span class="token punctuation">;</span>	<span class="token comment">//进位 </span>
+		s2<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span><span class="token punctuation">(</span>s1<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span> t <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">{</span>	<span class="token comment">//如果s1最后一位（栈底）翻倍以后&gt;10 </span>
+			s2<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>t<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">//在s2的栈顶添加进位 </span>
+		<span class="token punctuation">}</span>
+		s1<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	
+	<span class="token comment">//给两个数字字符串排序 </span>
+	<span class="token function">sort</span><span class="token punctuation">(</span>str<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>str<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">sort</span><span class="token punctuation">(</span>str2<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>str2<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	
+	<span class="token comment">//如果完全一样则符合题意 </span>
+	<span class="token keyword">if</span><span class="token punctuation">(</span>str <span class="token operator">==</span> str2<span class="token punctuation">)</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Yes\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+		<span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"No\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	
+	<span class="token comment">//依次弹出s2则为输出要求 </span>
+	<span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span>s2<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+		cout <span class="token operator">&lt;&lt;</span> s2<span class="token punctuation">.</span><span class="token function">top</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		s2<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+</code></pre>
+</div>
+</body>
+
+</html>
